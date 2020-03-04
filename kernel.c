@@ -16,13 +16,12 @@ int term_col = 0;
 int term_row = 0;
 uint8_t term_color = 0x0F;
 uint8_t text_color = 0x00;
-uint16_t buffer_val = ((uint16_t)term_color<<8) | ((uint16_t)text_color)<<4);
 
 // Clears the terminal
 void term_clear() {
-	for (int r = 0; r < VGA_ROWS: r++) {
+	for (int r = 0; r < VGA_ROWS; r++) {
 		for (int c = 0; c < VGA_COLS; c++) {
-			int index = (VGA_COLS * r) + c
+			int index = (VGA_COLS * r) + c;
 			vga_buffer[index] = ((uint16_t)term_color<<8) | ' ';
 		}
 	}
@@ -37,11 +36,11 @@ void term_putc(char c) {
 	int index = (VGA_COLS * term_row) + term_col;
 	vga_buffer[index] = ((uint16_t)term_color<<8) | c;
 	term_col++;
-	if (term_cols == VGA_COLS) {
+	if (term_col == VGA_COLS) {
         term_col = 0;
-        term_rows++;
-        if (term_rows == VGA_ROWS) {
-        	term_rows=0;
+        term_row++;
+        if (term_row == VGA_ROWS) {
+        	term_row=0;
         	// hopefully scroll in the future
         }
     }
@@ -49,7 +48,7 @@ void term_putc(char c) {
 
 void term_print(char* str) {
 	int i = 0;
-	while (str[i] != NULL) {
+	while (str[i] != '\0') {
 		term_putc(str[i++]);
 	}
 }
