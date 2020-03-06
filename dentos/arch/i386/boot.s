@@ -15,19 +15,24 @@
 .section .bss
 .align 16
 stack_bottom:
-	.skip 4096
+	.skip 16384
 stack_top:
 
 .section .text
-.global start
+.global _start
 
-start:
+_start:
 	// Start the stack pointer at the top of the stack to meet C reqs
 	mov		stack_top, esp
 
+	// Call global constructors
+	call	_init
+
+	// Pass control to the kernel
 	call	kernel_main
 
 	hang:
 		cli // Disable CPU interrupts
 		hlt	// Halt the CPU
 		jmp hang // Loop if the last two insturctions failed
+.size _start, . - _start
