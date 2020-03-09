@@ -10,7 +10,7 @@ if [[ "$1" = "clean" ]]; then
 
 	rm -rf sysroot
 	rm -rf isodir
-	rm -rf myos.iso
+	rm -rf dentos.iso
 else
 	echo "Building projects"
 	. ./headers.sh
