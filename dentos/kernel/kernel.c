@@ -7,5 +7,5 @@
 void kernel_main() {
 	term_init();
 
-	term_print("Welcome to the terminal!\n");
+	term_writestring("Welcome to the terminal!\n");
 }
