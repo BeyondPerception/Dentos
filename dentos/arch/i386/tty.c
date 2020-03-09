@@ -17,7 +17,7 @@ static uint8_t term_color;
 static uint16_t* term_buffer;
 
 void term_putcharat(unsigned char c, uint8_t color, size_t row, size_t col) {
-    const size_t index = (row * VGA_WIDTH) + col;
+    const size_t index = row * VGA_WIDTH + col;
     term_buffer[index] = vga_entry(c, color);
 }
 
@@ -26,7 +26,6 @@ void term_init(void) {
     term_col = 0;
     term_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
     term_buffer = VGA_MEMORY;
-
     for (size_t r = 0; r < VGA_HEIGHT; r++) {
         for (size_t c = 0; c < VGA_WIDTH; c++) {
             term_putcharat(' ', term_color, r, c);
@@ -48,19 +47,12 @@ void scroll(int lines) {
 }
 
 void term_putc(char c) {
-    if (c == '\n') {
+    unsigned char uc = c;
+    term_putcharat(uc, term_color, term_row, term_col);
+    if (++term_col == VGA_WIDTH) {
         term_col = 0;
-        term_row++;
-    } else {
-        term_putcharat(c, term_color, term_row, term_col);
-    }
-
-    if (term_col >= VGA_WIDTH) {
-        term_col = 0;
-        term_row++;
-    }
-    if (term_row >= VGA_HEIGHT) {
-        scroll(1);
+        if (++term_row == VGA_HEIGHT)
+            term_row = 0;
     }
 }
 
