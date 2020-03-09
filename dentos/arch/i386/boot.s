@@ -20,7 +20,7 @@ stack_top:
 
 .section .text
 .global _start
-
+.type _start, @function
 _start:
 	// Start the stack pointer at the top of the stack to meet C reqs
 	mov		stack_top, esp
@@ -31,6 +31,7 @@ _start:
 	// Pass control to the kernel
 	call	kernel_main
 
+	// If kernel_main unexpectedly returns
 	hang:
 		cli // Disable CPU interrupts
 		hlt	// Halt the CPU
