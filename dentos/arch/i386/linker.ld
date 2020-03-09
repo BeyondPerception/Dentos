@@ -1,5 +1,5 @@
-/* The bootloader will start execution at the symbol designated as the entry point. In this case, that's 'start' (defined in start.s) */
-ENTRY(start)
+/* The bootloader will start execution at the symbol designated as the entry point. In this case, that's '_start' (defined in boot.s) */
+ENTRY(_start)
 
 /* Tell the linker part of the compiler where the various sections of the kernel will be put in the final kernel executable. */
 SECTIONS
