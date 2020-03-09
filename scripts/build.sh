@@ -1,21 +1,8 @@
 #!/bin/sh
 set -e
-if [[ "$1" = "clean" ]]; then
-	echo "Cleaning projects"
-	. ./config.sh
+echo "Building projects"
+. ./scripts/headers.sh
 
-	for PROJECT in $PROJECTS; do
-	  (cd $PROJECT && $MAKE clean)
-	done
-
-	rm -rf sysroot
-	rm -rf isodir
-	rm -rf dentos.iso
-else
-	echo "Building projects"
-	. ./headers.sh
-
-	for PROJECT in $PROJECTS; do
-    	(cd $PROJECT && DESTDIR="$SYSROOT" $MAKE install)
-	done
-fi
+for PROJECT in $PROJECTS; do
+  (cd "$PROJECT" && DESTDIR="$SYSROOT" $MAKE install)
+done
