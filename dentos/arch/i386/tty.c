@@ -37,22 +37,27 @@ void term_setcolor(uint8_t color) {
     term_color = color;
 }
 
-void scroll(int lines) {
-    for (int i = 0; i < lines; i++) {
-        for (size_t j = 0; j < VGA_HEIGHT - 1; j++) {
-            memcpy(&term_buffer[j + 1], &term_buffer[j], VGA_HEIGHT);
+void scroll(int n) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < VGA_HEIGHT - 1; j++) {
+            memcpy(&term_buffer[j * VGA_WIDTH], &term_buffer[(j + 1) * VGA_WIDTH], VGA_WIDTH * sizeof(int));
         }
+        memset(&term_buffer[(VGA_WIDTH - 1) * VGA_HEIGHT - 1], 0, VGA_WIDTH * sizeof(int));
     }
-    //memset(term_buffer[VGA_HEIGHT * VGA_WIDTH], 0, VGA_WIDTH);
 }
 
 void term_putc(char c) {
     unsigned char uc = c;
-    term_putcharat(uc, term_color, term_row, term_col);
+    if (uc == 'n') {
+        term_row++;
+        term_col = 0;
+    } else {
+        term_putcharat(uc, term_color, term_row, term_col);
+    }
     if (++term_col == VGA_WIDTH) {
         term_col = 0;
         if (++term_row == VGA_HEIGHT)
-            term_row = 0;
+            scroll(1);
     }
 }
 
