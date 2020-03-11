@@ -39,7 +39,7 @@ void term_setcolor(uint8_t color) {
 
 void scroll(int n) {
     for (int i = 0; i < n; i++) {
-        for (int j = 0; j < VGA_HEIGHT - 1; j++) {
+        for (size_t j = 0; j < VGA_HEIGHT - 1; j++) {
             memcpy(&term_buffer[j * VGA_WIDTH], &term_buffer[(j + 1) * VGA_WIDTH], VGA_WIDTH * sizeof(int));
         }
         memset(&term_buffer[(VGA_WIDTH - 1) * VGA_HEIGHT - 1], 0, VGA_WIDTH * sizeof(int));
