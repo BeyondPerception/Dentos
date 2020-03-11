@@ -48,7 +48,7 @@ void scroll(int n) {
 
 void term_putc(char c) {
     unsigned char uc = c;
-    if (uc == 'n') {
+    if (uc == '\n') {
         term_row++;
         term_col = 0;
     } else {
