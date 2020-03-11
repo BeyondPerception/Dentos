@@ -40,23 +40,23 @@ _start:
     mov     ecx, 1023
 1:
 	// Only map the kernel
-    cmp     esi, _kernel_start - 0xC0000000
+    cmp     esi, OFFSET _kernel_start - 0xC0000000
     jl      2f
-    cmp     esi, _kernel_end - 0xC0000000
+    cmp     esi, OFFSET _kernel_end - 0xC0000000
     jge     3f
 
     mov     edx, esi
     or      edx, 0x3
-    mov     [edi], edx
+    mov     DWORD PTR[edi], edx
 2:
     // Page size is 4096 bytes
     add     esi, 4096
     // boot_page_table1 entry size is 4 bytes
-    add     edi, 0x4
+    add     edi, 4
     loop    1b
 3:
     // Map VGA video memory to 0xC03FF000 as "present, writable".
-    mov     DWORD PTR [boot_page_table1 - 0xC0000000 + 1023 * 4], 0x000B8000 | 0x3
+    mov     DWORD PTR[boot_page_table1 - 0xC0000000 + 1023 * 4], 0x000B8000 | 0x3
 
 	// The page table is used at both page directory entry 0 (virtually from 0x0
 	// to 0x3FFFFF) (thus identity mapping the kernel) and page directory entry
@@ -79,20 +79,20 @@ _start:
 
 	// Jump to high half
 	lea		ecx, 4f
-	jmp		*ecx
+	jmp		ecx
 
 4:
 	// Paging is now fully setup and enabled
 
 	// Unmap unnecessary identity mapping
-	mov		DWORD PTR[boot_page_directory], 0x0
+	mov		DWORD PTR[boot_page_directory], 0
 
 	// Reload crc3 to force a TLB flush so the changes to take effect.
 	mov		ecx, cr3
 	mov		cr3, ecx
 
-	// Start the stack pointer at the top of the stack to meet C reqs
-	mov		esp, stack_top
+	// Start the stack pointer at the top of the stack
+	mov		esp, OFFSET stack_top
 
 	// Call global constructors
 	call	_init
