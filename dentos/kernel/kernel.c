@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include <kernel/tty.h>
 
@@ -7,5 +8,5 @@
 void kernel_main() {
 	term_init();
 
-	term_writestring("Welcome to the terminal!\n");
+	puts("Welcome to the terminal!");
 }
