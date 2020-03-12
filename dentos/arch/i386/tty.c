@@ -68,7 +68,3 @@ void term_write(const char* data, size_t size) {
 		term_putc(data[i]);
 	}
 }
-
-void term_writestring(const char* data) {
-	term_write(data, strlen(data));
-}
