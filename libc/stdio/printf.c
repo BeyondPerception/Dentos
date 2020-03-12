@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 static bool print(const char* data, size_t length) {
 	const unsigned char* bytes = (const unsigned char*) data;
@@ -10,6 +11,19 @@ static bool print(const char* data, size_t length) {
 		if (putchar(bytes[i]) == EOF)
 			return false;
 	return true;
+}
+
+static int lenHelper(unsigned x) {
+	if (x >= 1000000000) return 10;
+	if (x >= 100000000) return 9;
+	if (x >= 10000000) return 8;
+	if (x >= 1000000) return 7;
+	if (x >= 100000) return 6;
+	if (x >= 10000) return 5;
+	if (x >= 1000) return 4;
+	if (x >= 100) return 3;
+	if (x >= 10) return 2;
+	return 1;
 }
 
 int printf(const char* restrict format, ...) {
@@ -56,6 +70,34 @@ int printf(const char* restrict format, ...) {
 			size_t len = strlen(str);
 			if (maxrem < len) {
 				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+			if (!print(str, len))
+				return -1;
+			written += len;
+		} else if (*format == 'd') {
+			format++;
+			int num = va_arg(parameters, int);
+			size_t len = num < 0 ? lenHelper(-num) + 1 : lenHelper(num);
+			len += 1;
+
+			char str[len];
+			str[len - 1] = '\0';
+			if (num < 0) {
+				str[0] = '-';
+				num = -num;
+			}
+			if (num == 0) {
+				str[len - 2] = '0';
+			}
+			int i = 0;
+			while (num > 0) {
+				str[len - i - 2] = (char) (num % 10) + 48;
+				i++;
+				num /= 10;
+			}
+			if (maxrem < len) {
+				// TODO: set errno to EOVERFLOW
 				return -1;
 			}
 			if (!print(str, len))
