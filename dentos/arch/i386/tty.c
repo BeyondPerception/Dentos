@@ -6,7 +6,7 @@
 
 static const size_t VGA_HEIGHT = 25;
 static const size_t VGA_WIDTH = 80;
-static uint16_t* const VGA_MEMORY = (uint16_t*) 0xC03FF000;
+static uint16_t* const VGA_MEMORY = (uint16_t*) 0xC03FF000; // Address of VGA buffer after page mapping
 
 static size_t term_row;
 static size_t term_col;
