@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "vga.h"
 
@@ -23,11 +24,7 @@ void term_init(void) {
 	term_col = 0;
 	term_color = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
 	term_buffer = VGA_MEMORY;
-	for (size_t r = 0; r < VGA_HEIGHT; r++) {
-		for (size_t c = 0; c < VGA_WIDTH; c++) {
-			term_putcharat(' ', term_color, r, c);
-		}
-	}
+	memset(term_buffer, 0, VGA_HEIGHT * VGA_WIDTH * sizeof(uint16_t));
 }
 
 void term_setcolor(uint8_t color) {
@@ -35,13 +32,12 @@ void term_setcolor(uint8_t color) {
 }
 
 void scroll(int n) {
-	for (int i = 0; i < n; i++) {
-		for (size_t j = 0; j < VGA_HEIGHT - 1; j++) {
-			memcpy(&term_buffer[j * VGA_WIDTH], &term_buffer[(j + 1) * VGA_WIDTH], VGA_WIDTH * sizeof(uint16_t));
-		}
-		for (size_t j = 0; j < VGA_WIDTH; j++) {
-			term_putcharat(' ', term_color, VGA_HEIGHT - 1, j);
-		}
+	if (n >= VGA_HEIGHT) {
+		term_init();
+	} else {
+		memcpy(&term_buffer[0], &term_buffer[n * VGA_WIDTH], VGA_WIDTH * sizeof(uint16_t) * (VGA_HEIGHT - n));
+		memset(&term_buffer[(VGA_HEIGHT - 1) * VGA_WIDTH - 1], 0,
+			   VGA_WIDTH * sizeof(uint16_t));
 	}
 }
 
