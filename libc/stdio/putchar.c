@@ -7,7 +7,7 @@
 int putchar(int ic) {
 #if defined(__is_libk)
 	char c = (char) ic;
-	term_write(&c, sizeof(c));
+	fputchar(STDOUT, c);
 #else
 	// TODO: Implement stdio and the write system call.
 #endif
