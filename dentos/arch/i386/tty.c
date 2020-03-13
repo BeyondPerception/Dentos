@@ -33,6 +33,7 @@ void term_clear() {
 	memsetw(term_buffer, vga_entry(' ', term_color), VGA_HEIGHT * VGA_WIDTH);
 	term_row = 0;
 	term_col = 0;
+	term_updatecsr();
 }
 
 void term_init(void) {
