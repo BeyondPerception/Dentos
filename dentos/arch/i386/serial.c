@@ -54,5 +54,7 @@ void serial_write(unsigned short com, const char* data, size_t len) {
 int printk(const char* restrict format, ...) {
 	va_list args;
 	va_start(args, format);
-	return fprintf(SERIAL, format, args);
+	int r = fprintf(SERIAL, format, args);
+	va_end(args);
+	return r;
 }

@@ -115,6 +115,5 @@ int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
 			format += len;
 		}
 	}
-	va_end(args);
 	return written;
 }

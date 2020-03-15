@@ -4,5 +4,7 @@
 int printf(const char* restrict format, ...) {
 	va_list args;
 	va_start(args, format);
-	return fprintf(STDOUT, format, args);
+	int r = fprintf(STDOUT, format, args);
+	va_end(args);
+	return r;
 }
