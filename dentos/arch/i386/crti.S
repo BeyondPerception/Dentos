@@ -13,4 +13,4 @@ _init:
 .type _fini, @function
 _fini:
 	push    ebp
-	movl    ebp, esp
+	mov     ebp, esp
