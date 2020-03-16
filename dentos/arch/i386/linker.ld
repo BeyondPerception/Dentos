@@ -8,12 +8,10 @@ SECTIONS
 	/* Note that we page-align the sections. */
 	. = 0xC0100000;
 
-	/* We use this symbol in the assembly, so it needs to be defined here */
+	/* Define symbol to be used in the assembly */
 	_kernel_start = .;
 
-	/* First put the multiboot header, as it is required to be put very early
-	   early in the image or the bootloader won't recognize the file format.
-	   Next we'll put the .text section. */
+	/* Mutliboot header goes first so the bootloader recognizes the file propely */
 	.text ALIGN (4K) : AT (ADDR (.text) - 0xC0000000)
 	{
 		*(.multiboot)
@@ -39,6 +37,6 @@ SECTIONS
 		*(.bss)
 		*(.bootstrap_stack)
 	}
-	/* And finally a symbol for the end address of the kernel  */
+	/* End address symbol used in the assembly */
 	_kernel_end = .;
 }
