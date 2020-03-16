@@ -31,7 +31,6 @@ boot_page_table1:
 
 .section .text
 .global _start
-.type _start, @function
 _start:
     mov     edi, OFFSET boot_page_table1 - 0xC0000000
     mov     esi, 0
@@ -91,7 +90,7 @@ _start:
 	mov		ecx, cr3
 	mov		cr3, ecx
 
-	// Start the stack pointer at the top of the stack
+	// Start the stack pointer at the top of the stack to meet C specs
 	mov		esp, OFFSET stack_top
 
 	// Call global constructors
@@ -106,3 +105,30 @@ _start:
 	hlt	// Halt the CPU
 	jmp     1b // Loop if the last two insturctions failed
 .size _start, . - _start
+
+gdtr:
+    .short  0
+    .int    0
+
+.global gdt_set
+gdt_set:
+    mov     eax, [esp + 4]
+    //add     eax, 0xC0000000
+    mov     [gdtr + 2], eax
+    mov     ax, [esp + 8]
+    mov     [gdtr], ax
+    lgdt    [gdtr]
+    ret
+
+// Setup new segment registers.
+.global gdt_flush
+gdt_flush:
+    jmp     0x08:.flushr
+.flushr:
+    mov     ax, 0x10
+    mov     ds, ax
+    mov     es, ax
+    mov     fs, ax
+    mov     gs, ax
+    mov     ss, ax
+    ret
