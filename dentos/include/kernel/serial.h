@@ -12,5 +12,6 @@ void serial_configure_modem(unsigned short);
 int serial_is_transmit_fifo_empty(unsigned int);
 void serial_write(unsigned short, const char*, size_t);
 int printk(const char* restrict format, ...);
+int putsk(const char*);
 
 #endif //DENTOS_SERIAL_H

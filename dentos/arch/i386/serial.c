@@ -58,3 +58,7 @@ int printk(const char* restrict format, ...) {
 	va_end(args);
 	return r;
 }
+
+int putsk(const char* string) {
+	printk("%s\n", string);
+}

@@ -11,10 +11,10 @@ void kernel_main() {
 	serial_configure_buffer(SERIAL_COM1_BASE);
 	serial_configure_modem(SERIAL_COM1_BASE);
 
-	printk("%s\n", "Serial setup successfully");
+	putsk("Serial setup successfully");
 
 	gdt_init();
-	printk("%s\n", "New GDT installed successfully");
+	putsk("New GDT installed successfully");
 
 	term_init();
 
