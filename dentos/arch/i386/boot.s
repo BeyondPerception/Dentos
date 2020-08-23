@@ -107,8 +107,8 @@ _start:
 .size _start, . - _start
 
 gdtr:
-    .short  0
-    .int    0
+    .short  0 // size of gdt
+    .int    0 // location of gdt
 
 .global gdt_set
 gdt_set:
@@ -131,4 +131,17 @@ gdt_flush:
     mov     fs, ax
     mov     gs, ax
     mov     ss, ax
+    ret
+
+idtr:
+    .short  0 // size of idt
+    .int    0 // location of idt
+
+.global idt_set
+idt_set:
+    mov     eax, [esp + 4]
+    mov     [idtr + 2], eax
+    mov     ax, [esp + 8]
+    mov     [idtr], ax
+    lidt    [idtr]
     ret

@@ -3,6 +3,7 @@
 #include <kernel/serial.h>
 #include <kernel/gdt.h>
 #include <kernel/tty.h>
+#include <kernel/idt.h>
 
 // Main method called by boot
 void kernel_main() {
@@ -15,6 +16,9 @@ void kernel_main() {
 
 	gdt_init();
 	putsk("New GDT installed successfully");
+
+	idt_init();
+	putsk("IDT setup successfully");
 
 	term_init();
 
