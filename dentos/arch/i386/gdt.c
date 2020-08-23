@@ -1,6 +1,3 @@
-#include <stdint.h>
-#include <kernel/serial.h>
-
 struct gdt_entry {
 	unsigned short limit_low;
 	unsigned short base_low;
@@ -15,12 +12,12 @@ struct gdt_entry gdt[3];
 void gdt_setentry(int i, unsigned long base, unsigned long limit, unsigned char access, unsigned char gran) {
 	// Set base
 	gdt[i].base_low = base & 0xFFFF;
-	gdt[i].base_mid = (base >> 16) & 0xFF;
-	gdt[i].base_high = (base >> 24) & 0xFF;
+	gdt[i].base_mid = base >> 16 & 0xFF;
+	gdt[i].base_high = base >> 24 & 0xFF;
 
 	// Set limit
 	gdt[i].limit_low = limit & 0xFFFF;
-	gdt[i].granularity = (limit >> 16) & 0x0F;
+	gdt[i].granularity = limit >> 16 & 0x0F;
 
 	gdt[i].granularity |= gran & 0xF0;
 	gdt[i].access = access;
