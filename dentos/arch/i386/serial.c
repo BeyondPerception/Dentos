@@ -59,6 +59,6 @@ int printk(const char* restrict format, ...) {
 	return r;
 }
 
-int putsk(const char* string) {
+void putsk(const char* string) {
 	printk("%s\n", string);
 }
