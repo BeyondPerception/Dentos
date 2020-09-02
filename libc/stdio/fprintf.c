@@ -12,7 +12,7 @@ static bool print(enum OUTSTREAM stream, const char* data, size_t len) {
 	return true;
 }
 
-static int lenHelper(unsigned x) {
+static int lenHelper(unsigned int x) {
 	if (x >= 1000000000) return 10;
 	if (x >= 100000000) return 9;
 	if (x >= 10000000) return 8;
@@ -75,8 +75,7 @@ int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
 			written += len;
 		} else if (*format == 'd') {
 			format++;
-			int num = va_arg(args,
-							 int);
+			unsigned int num = va_arg(args, unsigned int);
 			size_t len = num < 0 ? lenHelper(-num) + 1 : lenHelper(num);
 			len += 1;
 
@@ -91,9 +90,9 @@ int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
 			}
 			int i = 0;
 			while (num > 0) {
-				str[len - i - 2] = (char) (num % 10) + 48;
+				str[len - i - 2] = (char) (num % 10L) + 48L;
 				i++;
-				num /= 10;
+				num /= 10L;
 			}
 			if (maxrem < len) {
 				// TODO: set errno to EOVERFLOW
@@ -102,6 +101,51 @@ int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
 			if (!print(stream, str, len))
 				return -1;
 			written += len;
+		} else if (*format == 'x') {
+			format++;
+			unsigned int num = va_arg(args, unsigned int);
+
+			char str[11];
+			str[0] = '0';
+			str[1] = 'x';
+			str[10] = '\0';
+			int i = 2;
+			unsigned int div = 268435456;
+			while (i < 10) {
+				int count = num / div;
+				switch (count) {
+					case 15:
+						str[i] = 'F';
+						break;
+					case 14:
+						str[i] = 'E';
+						break;
+					case 13:
+						str[i] = 'D';
+						break;
+					case 12:
+						str[i] = 'C';
+						break;
+					case 11:
+						str[i] = 'B';
+						break;
+					case 10:
+						str[i] = 'A';
+						break;
+					default:
+						str[i] = (char) count + 48;
+				}
+				num %= div;
+				div /= 16;
+				i++;
+			}
+			if (maxrem < 11) {
+				// TODO: set errno to EOVERFLOW
+				return -1;
+			}
+			if (!print(stream, str, 11))
+				return -1;
+			written += 11;
 		} else {
 			format = format_begun_at;
 			size_t len = strlen(format);
