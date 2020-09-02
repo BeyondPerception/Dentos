@@ -60,12 +60,57 @@ void add_irq(unsigned char i, unsigned int offset, unsigned short selector, unsi
 }
 
 extern void irq0(void);
+extern void irq1(void);
+extern void irq2(void);
+extern void irq3(void);
+extern void irq4(void);
+extern void irq5(void);
+extern void irq6(void);
+extern void irq7(void);
+extern void irq8(void);
+extern void irq10(void);
+extern void irq11(void);
+extern void irq12(void);
+extern void irq13(void);
+extern void irq14(void);
+extern void irq16(void);
+extern void irq17(void);
+extern void irq18(void);
+extern void irq19(void);
+extern void irq20(void);
+extern void irq30(void);
+
+extern void irq32(void);
+extern void irq33(void);
 
 void idt_init(void) {
 	PIC_remap(0x20, 0x28);
 
 	// 0x8 is the kernel code segment. Each gdt entry is 8 bytes long, and the kernel code segment is the second one.
-	add_irq(0, (unsigned long)irq0, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+	add_irq(0, (unsigned long) irq0, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+	add_irq(1, (unsigned long) irq1, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+	add_irq(2, (unsigned long) irq2, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+	add_irq(3, (unsigned long) irq3, 0x8, 0b1000 << 4 | TRAP_GATE);
+	add_irq(4, (unsigned long) irq4, 0x8, 0b1000 << 4 | TRAP_GATE);
+	add_irq(5, (unsigned long) irq5, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+	add_irq(6, (unsigned long) irq6, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+	add_irq(7, (unsigned long) irq7, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+	add_irq(8, (unsigned long) irq8, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+	add_irq(10, (unsigned long) irq10, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+	add_irq(11, (unsigned long) irq11, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+	add_irq(12, (unsigned long) irq12, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+	add_irq(13, (unsigned long) irq13, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+	add_irq(14, (unsigned long) irq14, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+	add_irq(16, (unsigned long) irq16, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+	add_irq(17, (unsigned long) irq17, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+	add_irq(18, (unsigned long) irq18, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+	add_irq(19, (unsigned long) irq19, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+	add_irq(20, (unsigned long) irq20, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+	add_irq(30, (unsigned long) irq30, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+
+
+	add_irq(32, (unsigned long) irq32, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
+	add_irq(33, (unsigned long) irq33, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
 
 	idt_set(&idt, sizeof(idt) - 1);
 }
