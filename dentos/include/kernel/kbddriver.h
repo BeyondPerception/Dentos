@@ -3,6 +3,6 @@
 
 #define KEYBOARD_CONTROLLER_PORT 0x60
 
-void handle_keycode(unsigned char);
+void handle_keycode(unsigned char keycode);
 
 #endif //DENTOS_KBDDRIVER_H
