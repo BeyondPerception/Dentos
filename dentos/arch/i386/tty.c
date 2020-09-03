@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "kernel/io.h"
+#include <kernel/io.h>
 
 #include "vga.h"
 
