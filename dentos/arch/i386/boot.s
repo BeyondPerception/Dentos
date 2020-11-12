@@ -120,7 +120,7 @@ pd_init:
     mov     DWORD PTR[boot_page_directory], 0
 
     // Put the address of the page directory itself into the last page directory entry for easy access in C code.
-    mov     DWORD PTR[boot_page_directory + 1023 * 4], OFFSET boot_page_directory + 0x3
+    mov     DWORD PTR[boot_page_directory + 1023 * 4], OFFSET boot_page_directory - 0xC0000000 + 0x3
 
     // Identity map the first 256 pages (1MB)
     mov     ecx, 256
