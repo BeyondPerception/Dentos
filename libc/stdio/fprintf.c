@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#define isformatcode(c) (c == 'c' || c == 'd' || c == 'x' || c == 's' || c == 'p')
+#define isdigit(c) (c >= '0' && c <= '9')
+
 static bool print(enum OUTSTREAM stream, const char* data, size_t len) {
 	const unsigned char* bytes = (const unsigned char*) data;
 	for (size_t i = 0; i < len; i++)
@@ -50,6 +53,43 @@ int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
 
 		const char* format_begun_at = format++;
 
+		bool isUnsigned = false;
+		bool isLong = false;
+		bool zeroBuffered = false;
+		bool leftJustified = false;
+		unsigned int requestedLength = 0;
+
+		for (const char* cur = format_begun_at; !isformatcode(*cur); cur++) {
+			switch (*cur) {
+				case 'u':
+					isUnsigned = true;
+					break;
+				case 'l':
+					isLong = true;
+					break;
+				case '-':
+					leftJustified = true;
+					break;
+				case '0':
+					if (requestedLength == 0) {
+						zeroBuffered = true;
+						break;
+					}
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+					while (isdigit(*cur++)) {
+						requestedLength++;
+					}
+					break;
+			}
+		}
 		if (*format == 'c') {
 			format++;
 			char c = (char) va_arg(args,
@@ -66,14 +106,36 @@ int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
 			const char* str = va_arg(args,
 									 const char*);
 			size_t len = strlen(str);
-			if (maxrem < len) {
-				// TODO: Set errno to EOVERFLOW.
-				return -1;
+			if (len < requestedLength) {
+				size_t newLen = len + (requestedLength - len);
+				char newStr[newLen + 1];
+				newStr[newLen] = '\0';
+				if(leftJustified) {
+					memset(newStr + len, ' ', requestedLength-len);
+					memcpy(newStr, str, len);
+				} else {
+					memset(newStr, ' ', requestedLength - len);
+					memcpy(newStr + requestedLength - len, str, len);
+				}
+				if (maxrem < newLen) {
+					// TODO: Set errno to EOVERFLOW.
+					return -1;
+				}
+				if (!print(stream, newStr, newLen))
+					return -1;
+				written += newLen;
+			} else {
+				if (maxrem < len) {
+					// TODO: Set errno to EOVERFLOW.
+					return -1;
+				}
+				if (!print(stream, str, len))
+					return -1;
+				written += len;
 			}
-			if (!print(stream, str, len))
-				return -1;
-			written += len;
 		} else if (*format == 'd') {
+
+
 			format++;
 			unsigned int num = va_arg(args, unsigned int);
 			size_t len = num < 0 ? lenHelper(-num) + 1 : lenHelper(num);
