@@ -16,17 +16,132 @@ static bool print(enum OUTSTREAM stream, const char* data, size_t len) {
 	return true;
 }
 
-static int lenHelper(unsigned int x) {
-	if (x >= 1000000000) return 10;
-	if (x >= 100000000) return 9;
-	if (x >= 10000000) return 8;
-	if (x >= 1000000) return 7;
-	if (x >= 100000) return 6;
-	if (x >= 10000) return 5;
-	if (x >= 1000) return 4;
-	if (x >= 100) return 3;
-	if (x >= 10) return 2;
-	return 1;
+static int _fprint(enum OUTSTREAM stream, const char* data, size_t len, size_t maxrem, bool zeroBuffered,
+				   bool leftJustified, int requestedLength) {
+	if (len < requestedLength) {
+		size_t newLen = len + (requestedLength - len);
+		char newStr[newLen + 1];
+		newStr[newLen] = '\0';
+		char filler = (zeroBuffered) ? '0' : ' ';
+		if (leftJustified) {
+			memset(newStr + len, filler, requestedLength - len);
+			memcpy(newStr, data, len);
+		} else {
+			memset(newStr, filler, requestedLength - len);
+			memcpy(newStr + requestedLength - len, data, len);
+		}
+		if (maxrem < newLen) {
+			// TODO: Set errno to EOVERFLOW.
+			return -1;
+		}
+		if (!print(stream, newStr, newLen))
+			return -1;
+		return newLen;
+	} else {
+		if (maxrem < len) {
+			// TODO: Set errno to EOVERFLOW.
+			return -1;
+		}
+		if (!print(stream, data, len))
+			return -1;
+		return len;
+	}
+}
+
+static const unsigned char guess10[33] = {
+		0, 0, 0, 0, 1, 1, 1, 2, 2, 2,
+		3, 3, 3, 3, 4, 4, 4, 5, 5, 5,
+		6, 6, 6, 6, 7, 7, 7, 8, 8, 8,
+		9, 9, 9
+};
+static const unsigned int tenToThe[] = {
+		1, 10, 100, 1000, 10000, 100000,
+		1000000, 10000000, 100000000, 1000000000,
+};
+static const unsigned char guess16[33] = {
+		0, 0, 0, 0, 0, 1, 1, 1, 1, 2,
+		2, 2, 2, 3, 3, 3, 3, 4, 4, 4,
+		4, 5, 5, 5, 5, 6, 6, 6, 6, 7,
+		7, 7, 7
+};
+static const unsigned int sixteenToThe[] = {
+		1, 15, 256, 4096, 65536, 1048576,
+		16777216, 268435456
+};
+
+unsigned int digitcount2(unsigned int x) {
+	return x ? 32 - __builtin_clz(x) : 0;
+}
+
+static unsigned int udigitcount10(unsigned int x) {
+	unsigned int digits = guess10[digitcount2(x)];
+	return digits + (x >= tenToThe[digits]);
+}
+
+static unsigned int digitcount10(int x) {
+	bool neg = false;
+	if (x < 0) {
+		x = -x;
+		neg = true;
+	}
+	unsigned int digits = guess10[digitcount2(x)];
+	return digits + (x >= tenToThe[digits]) + neg;
+}
+
+static unsigned int udigitcount16(unsigned int x) {
+	unsigned int digits = guess16[digitcount2(x)];
+	return digits + (x >= sixteenToThe[digits]);
+}
+
+static unsigned int digitcount16(unsigned int x) {
+	bool neg = false;
+	if (x < 0) {
+		x = -x;
+		neg = true;
+	}
+	unsigned int digits = guess16[digitcount2(x)];
+	return digits + (x >= sixteenToThe[digits]) + neg;
+}
+
+static const char* setformatoptions(const char* restrict format, bool* isUnsigned, bool* isLong, bool* zeroBuffered,
+									bool* leftJustified, unsigned int* requestedLength) {
+	while (!isformatcode(*format)) {
+		switch (*format) {
+			case 'u':
+				*isUnsigned = true;
+				break;
+			case 'l':
+				*isLong = true;
+				break;
+			case '-':
+				*leftJustified = true;
+				break;
+			case '0':
+				if (*requestedLength == 0) {
+					*zeroBuffered = true;
+					break;
+				}
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9': {
+				while (isdigit(*format)) {
+					*requestedLength = *requestedLength * 10 + (*format - '0');
+					format++;
+				}
+				goto end;
+			}
+		}
+		format++;
+		end:;
+	}
+
+	return format;
 }
 
 int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
