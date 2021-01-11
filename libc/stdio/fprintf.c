@@ -74,11 +74,15 @@ unsigned int digitcount2(unsigned int x) {
 }
 
 static unsigned int udigitcount10(unsigned int x) {
+	if (x == 0)
+		return 1;
 	unsigned int digits = guess10[digitcount2(x)];
 	return digits + (x >= tenToThe[digits]);
 }
 
 static unsigned int digitcount10(int x) {
+	if (x == 0)
+		return 1;
 	bool neg = false;
 	if (x < 0) {
 		x = -x;
@@ -89,11 +93,15 @@ static unsigned int digitcount10(int x) {
 }
 
 static unsigned int udigitcount16(unsigned int x) {
+	if (x == 0)
+		return 1;
 	unsigned int digits = guess16[digitcount2(x)];
 	return digits + (x >= sixteenToThe[digits]);
 }
 
 static unsigned int digitcount16(unsigned int x) {
+	if (x == 0)
+		return 1;
 	bool neg = false;
 	if (x < 0) {
 		x = -x;
@@ -199,7 +207,6 @@ int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
 			}
 			written += ret;
 		} else if (*format == 'd') {
-			puts(format);
 			format++;
 			int ret;
 			if (isUnsigned) {
@@ -208,6 +215,8 @@ int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
 				char tmpStr[len + 1];
 				tmpStr[len] = '\0';
 				int i = 0;
+				if (num == 0)
+					tmpStr[0] = '0';
 				while (num > 0) {
 					tmpStr[len - i - 2] = (char) (num % 10L) + 48L;
 					i++;
@@ -227,6 +236,8 @@ int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
 				} else {
 					i = 0;
 				}
+				if (num == 0)
+					tmpStr[0] = '0';
 				while (num > 0) {
 					tmpStr[len - i - 1] = (char) (num % 10) + '0';
 					i++;
@@ -248,6 +259,10 @@ int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
 				tmpStr[len] = '\0';
 				tmpStr[0] = '\0';
 				int i = 0;
+				if (num == 0) {
+					tmpStr[0] = '0';
+					i = len;
+				}
 				unsigned int div = 268435456;
 				while (i < len) {
 					int count = num / div;
@@ -270,6 +285,10 @@ int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
 				tmpStr[len] = '\0';
 				tmpStr[0] = '\0';
 				int i = 0;
+				if (num == 0) {
+					tmpStr[0] = '0';
+					i = len;
+				}
 				if (num < 0) {
 					num = -num;
 					tmpStr[0] = '-';
