@@ -3,8 +3,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <kernel/serial.h>
 
-#define isformatcode(c) (c == 'c' || c == 'd' || c == 'x' || c == 's' || c == 'p')
+#define isformatcode(c) (c == 'c' || c == 'd' || c == 'x' || c == 'X' || c == 's' || c == 'p')
 #define isdigit(c) (c >= '0' && c <= '9')
 
 static bool print(enum OUTSTREAM stream, const char* data, size_t len) {
