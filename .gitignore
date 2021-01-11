@@ -6,3 +6,4 @@ sysroot/
 .idea/
 cmake-build-debug/
 CMakeLists.txt
+.run/
