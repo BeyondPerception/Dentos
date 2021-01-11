@@ -46,7 +46,7 @@ int serial_is_transmit_fifo_empty(unsigned int com) {
 
 void serial_write(unsigned short com, const char* data, size_t len) {
 	for (size_t i = 0; i < len; i++) {
-		while (!serial_is_transmit_fifo_empty(com)) {}
+		while (!serial_is_transmit_fifo_empty(com)) { /* block */ }
 		outb(SERIAL_DATA_PORT(com), data[i]);
 	}
 }
