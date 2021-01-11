@@ -152,7 +152,7 @@ static const char* setformatoptions(const char* restrict format, bool* isUnsigne
 	return format;
 }
 
-int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
+int vfprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
 	int written = 0;
 
 	while (*format != '\0') {
@@ -187,8 +187,7 @@ int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
 
 		if (*format == 'c') {
 			format++;
-			char c = (char) va_arg(args,
-								   int /* char promotes to int */);
+			char c = (char) va_arg(args, int /* char promotes to int */);
 			if (!maxrem) {
 				// TODO: Set errno to EOVERFLOW.
 				return -1;
@@ -198,8 +197,7 @@ int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
 			written++;
 		} else if (*format == 's') {
 			format++;
-			const char* str = va_arg(args,
-									 const char*);
+			const char* str = va_arg(args, const char*);
 			size_t len = strlen(str);
 			int ret = _fprint(stream, str, len, maxrem, zeroBuffered, leftJustified, requestedLength);
 			if (ret == -1) {
@@ -316,7 +314,12 @@ int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
 			written += ret;
 		} else if (*format == 'p') {
 			format++;
-			fprintf(stream, "0x%u08X", args);
+			unsigned int num = va_arg(args, unsigned int);
+			int ret = fprintf(stream, "0x%u08X", num);
+			if (ret == -1) {
+				return -1;
+			}
+			written += ret;
 		} else {
 			format = format_begun_at;
 			size_t len = strlen(format);
@@ -331,4 +334,12 @@ int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
 		}
 	}
 	return written;
+}
+
+int fprintf(enum OUTSTREAM stream, const char* restrict format, ...) {
+	va_list args;
+	va_start(args, format);
+	int r = vfprintf(stream, format, args);
+	va_end(args);
+	return r;
 }
