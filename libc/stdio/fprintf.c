@@ -167,7 +167,7 @@ int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
 			continue;
 		}
 
-		const char* format_begun_at = format++;
+		const char* format_begun_at = format;
 
 		bool isUnsigned = false;
 		bool isLong = false;
@@ -175,37 +175,8 @@ int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
 		bool leftJustified = false;
 		unsigned int requestedLength = 0;
 
-		for (const char* cur = format_begun_at; !isformatcode(*cur); cur++) {
-			switch (*cur) {
-				case 'u':
-					isUnsigned = true;
-					break;
-				case 'l':
-					isLong = true;
-					break;
-				case '-':
-					leftJustified = true;
-					break;
-				case '0':
-					if (requestedLength == 0) {
-						zeroBuffered = true;
-						break;
-					}
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				case '6':
-				case '7':
-				case '8':
-				case '9':
-					while (isdigit(*cur++)) {
-						requestedLength++;
-					}
-					break;
-			}
-		}
+		format = setformatoptions(format, &isUnsigned, &isLong, &zeroBuffered, &leftJustified, &requestedLength);
+
 		if (*format == 'c') {
 			format++;
 			char c = (char) va_arg(args,
@@ -222,108 +193,111 @@ int fprintf(enum OUTSTREAM stream, const char* restrict format, va_list args) {
 			const char* str = va_arg(args,
 									 const char*);
 			size_t len = strlen(str);
-			if (len < requestedLength) {
-				size_t newLen = len + (requestedLength - len);
-				char newStr[newLen + 1];
-				newStr[newLen] = '\0';
-				if(leftJustified) {
-					memset(newStr + len, ' ', requestedLength-len);
-					memcpy(newStr, str, len);
-				} else {
-					memset(newStr, ' ', requestedLength - len);
-					memcpy(newStr + requestedLength - len, str, len);
-				}
-				if (maxrem < newLen) {
-					// TODO: Set errno to EOVERFLOW.
-					return -1;
-				}
-				if (!print(stream, newStr, newLen))
-					return -1;
-				written += newLen;
-			} else {
-				if (maxrem < len) {
-					// TODO: Set errno to EOVERFLOW.
-					return -1;
-				}
-				if (!print(stream, str, len))
-					return -1;
-				written += len;
+			int ret = _fprint(stream, str, len, maxrem, zeroBuffered, leftJustified, requestedLength);
+			if (ret == -1) {
+				return -1;
 			}
+			written += ret;
 		} else if (*format == 'd') {
-
-
+			puts(format);
 			format++;
-			unsigned int num = va_arg(args, unsigned int);
-			size_t len = num < 0 ? lenHelper(-num) + 1 : lenHelper(num);
-			len += 1;
-
-			char str[len];
-			str[len - 1] = '\0';
-			if (num < 0) {
-				str[0] = '-';
-				num = -num;
-			}
-			if (num == 0) {
-				str[len - 2] = '0';
-			}
-			int i = 0;
-			while (num > 0) {
-				str[len - i - 2] = (char) (num % 10L) + 48L;
-				i++;
-				num /= 10L;
-			}
-			if (maxrem < len) {
-				// TODO: set errno to EOVERFLOW
-				return -1;
-			}
-			if (!print(stream, str, len))
-				return -1;
-			written += len;
-		} else if (*format == 'x') {
-			format++;
-			unsigned int num = va_arg(args, unsigned int);
-
-			char str[11];
-			str[0] = '0';
-			str[1] = 'x';
-			str[10] = '\0';
-			int i = 2;
-			unsigned int div = 268435456;
-			while (i < 10) {
-				int count = num / div;
-				switch (count) {
-					case 15:
-						str[i] = 'F';
-						break;
-					case 14:
-						str[i] = 'E';
-						break;
-					case 13:
-						str[i] = 'D';
-						break;
-					case 12:
-						str[i] = 'C';
-						break;
-					case 11:
-						str[i] = 'B';
-						break;
-					case 10:
-						str[i] = 'A';
-						break;
-					default:
-						str[i] = (char) count + 48;
+			int ret;
+			if (isUnsigned) {
+				unsigned int num = va_arg(args, unsigned int);
+				int len = udigitcount10(num);
+				char tmpStr[len + 1];
+				tmpStr[len] = '\0';
+				int i = 0;
+				while (num > 0) {
+					tmpStr[len - i - 2] = (char) (num % 10L) + 48L;
+					i++;
+					num /= 10L;
 				}
-				num %= div;
-				div /= 16;
-				i++;
+				ret = _fprint(stream, tmpStr, len, maxrem, zeroBuffered, leftJustified, requestedLength);
+			} else {
+				int num = va_arg(args, int);
+				int len = digitcount10(num);
+				char tmpStr[len + 1];
+				tmpStr[len] = '\0';
+				int i;
+				if (num < 0) {
+					num = -num;
+					i = 1;
+					tmpStr[0] = '-';
+				} else {
+					i = 0;
+				}
+				while (num > 0) {
+					tmpStr[len - i - 1] = (char) (num % 10) + '0';
+					i++;
+					num /= 10;
+				}
+				ret = _fprint(stream, tmpStr, len, maxrem, zeroBuffered, leftJustified, requestedLength);
 			}
-			if (maxrem < 11) {
-				// TODO: set errno to EOVERFLOW
+			if (ret == -1) {
 				return -1;
 			}
-			if (!print(stream, str, 11))
+			written += ret;
+		} else if (*format == 'x' || *format == 'X') {
+			format++;
+			int ret;
+			if (isUnsigned) {
+				unsigned int num = va_arg(args, unsigned int);
+				int len = udigitcount16(num);
+				char tmpStr[len + 1];
+				tmpStr[len] = '\0';
+				tmpStr[0] = '\0';
+				int i = 0;
+				unsigned int div = 268435456;
+				while (i < len) {
+					int count = num / div;
+					if (count == 0 && tmpStr[0] == '\0') {
+						div /= 16;
+						continue;
+					}
+					if (count >= 10)
+						tmpStr[i++] = (char) count - 10 + ((*format == 'x') ? 'a' : 'A');
+					else
+						tmpStr[i++] = (char) count + '0';
+					num %= div;
+					div /= 16;
+				}
+				ret = _fprint(stream, tmpStr, len, maxrem, zeroBuffered, leftJustified, requestedLength);
+			} else {
+				int num = va_arg(args, int);
+				int len = digitcount16(num);
+				char tmpStr[len + 1];
+				tmpStr[len] = '\0';
+				tmpStr[0] = '\0';
+				int i = 0;
+				if (num < 0) {
+					num = -num;
+					tmpStr[0] = '-';
+					i = 1;
+				}
+				unsigned int div = 268435456;
+				while (i < len) {
+					int count = num / div;
+					if (count == 0 && tmpStr[0] == '\0') {
+						div /= 16;
+						continue;
+					}
+					if (count >= 10)
+						tmpStr[i++] = (char) count - 10 + ((*format == 'x') ? 'a' : 'A');
+					else
+						tmpStr[i++] = (char) count + '0';
+					num %= div;
+					div /= 16;
+				}
+				ret = _fprint(stream, tmpStr, len, maxrem, zeroBuffered, leftJustified, requestedLength);
+			}
+			if (ret == -1) {
 				return -1;
-			written += 11;
+			}
+			written += ret;
+		} else if (*format == 'p') {
+			format++;
+			fprintf(stream, "0x%u08X", args);
 		} else {
 			format = format_begun_at;
 			size_t len = strlen(format);
