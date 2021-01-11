@@ -1,29 +1,19 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <kernel/multiboot.h>
 #include <kernel/serial.h>
 #include <kernel/gdt.h>
 #include <kernel/tty.h>
 #include <kernel/idt.h>
+#include <kernel/mmap.h>
+#include <kernel/kernel.h>
 
 extern void _kernel_start(void);
-
 extern void _kernel_end(void);
 
-typedef struct multiboot_memory_map {
-	unsigned int size;
-	unsigned int base_addr_low, base_addr_high;
-// You can also use: unsigned long long int base_addr; if supported.
-	unsigned int length_low, length_high;
-// You can also use: unsigned long long int length; if supported.
-	unsigned int type;
-} multiboot_memory_map_t;
-
-// this is really an entry, not the entire map.
-typedef multiboot_memory_map_t mmap_entry_t;
-
 // Main method called by boot
-_Noreturn void kernel_main(multiboot_info_t* mbd) {
+_Noreturn void kernel_main(multiboot_info_t* mb_info, unsigned int mb_magic) {
 	serial_configure_baud_rate(SERIAL_COM1_BASE, 3);
 	serial_configure_line(SERIAL_COM1_BASE);
 	serial_configure_buffer(SERIAL_COM1_BASE);
@@ -39,27 +29,40 @@ _Noreturn void kernel_main(multiboot_info_t* mbd) {
 
 	term_init();
 
-	printk("Multiboot Info Addr: %x\n", mbd);
+	puts(" _   _ _    ____             _            \n" \
+                "| | | (_)  |  _ \\  ___ _ __ | |_ ___  ___ \n" \
+                "| |_| | |  | | | |/ _ \\ '_ \\| __/ _ \\/ __|\n" \
+                "|  _  | |  | |_| |  __/ | | | || (_) \\__ \\\n" \
+                "|_| |_|_|  |____/ \\___|_| |_|\\__\\___/|___/\n" \
+                "");
+
+	if (mb_magic != MULTIBOOT_BOOTLOADER_MAGIC) {
+		puts("Error: not loaded by a multiboot compliant bootloader!");
+		panic();
+	}
+
+	mmap_init(mb_info);
+
+	printk("Multiboot Info Addr: %p\n", mb_info);
 
 	unsigned long vstart = (unsigned long) &_kernel_start;
 	unsigned long vend = (unsigned long) &_kernel_end;
 
-
-	printk("Mem Upper: %x\n", mbd->mem_upper);
-	printk("Mem Lower: %x\n\n", mbd->mem_lower);
-
 	int i = 0;
-	mmap_entry_t* entry = mbd->mmap_addr;
-	while (entry < mbd->mmap_addr + mbd->mmap_length) {
-		entry = (mmap_entry_t*) ((unsigned int) entry + entry->size + sizeof(entry->size));
-		printk("Segment %d:\nSize: %d\nAddr: %x\nLen: %x\nType: %d\n\n", i++, entry->size,
-			   (entry->base_addr_high << 16) | entry->base_addr_low, (entry->length_high << 16) | entry->length_low,
+	multiboot_memory_map_t* entry = mb_info->mmap_addr;
+	while (entry < mb_info->mmap_addr + mb_info->mmap_length) {
+		//printf("Struct Addr: %p\n", entry);
+		entry = (multiboot_memory_map_t*) ((unsigned long) entry + entry->size + sizeof(entry->size));
+		printk("Segment %d:, Size: %d, Addr: %p, Len: %x, Type: %d\n", i++, entry->size,
+			   (entry->addr_high << 16) | entry->addr_low, (entry->len_high << 16) | entry->len_low,
 			   entry->type);
 	}
 
+	printk("Kernel Start: %p\n", vstart);
+	printk("Kernel End: %p\n", vend);
 	printk("Kernel Size: %dK\n", (vend - vstart) / 1024);
 
-	printf("Welcome to the terminal!\n");
+	puts("Welcome to the Dentos Console!\n");
 
 	for (;;) {
 		__asm__("hlt");
