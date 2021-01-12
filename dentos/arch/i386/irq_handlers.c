@@ -53,33 +53,33 @@ void devnotavail_handler(void) {
 	outb(0x20, 0x20);
 }
 
-void doublefault_handler(void) {
-	puts("Double Fault!");
+void doublefault_handler(int error) {
+	printf("Double Fault!: %d\n", error);
 	outb(0x20, 0x20);
 }
 
-void invalidtss_handler(void) {
-	puts("Invalid TSS!");
+void invalidtss_handler(int error) {
+	printf("Invalid TSS!: %d\n", error);
 	outb(0x20, 0x20);
 }
 
-void seg_notprsnt_handler(void) {
-	puts("Segment Not Present!");
+void seg_notprsnt_handler(int error) {
+	printf("Segment Not Present!: %d\n", error);
 	outb(0x20, 0x20);
 }
 
-void stack_segfault_handler(void) {
-	puts("Stack-Segment Fault!");
+void stack_segfault_handler(int error) {
+	printf("Stack-Segment Fault!: %d\n", error);
 	outb(0x20, 0x20);
 }
 
-void gpf_handler(void) {
-	puts("General Protection Fault!");
+void gpf_handler(int error) {
+	printf("General Protection Fault!: %d\n", error);
 	outb(0x20, 0x20);
 }
 
-void pagefault_handler(void) {
-	puts("Page Fault!");
+void pagefault_handler(int error) {
+	printf("Page Fault!: %d\n", error);
 	outb(0x20, 0x20);
 }
 
@@ -88,8 +88,8 @@ void x87float_exc_handler(void) {
 	outb(0x20, 0x20);
 }
 
-void align_chk_handler(void) {
-	puts("Align Check!");
+void align_chk_handler(int error) {
+	printf("Align Check!: %d\n", error);
 	outb(0x20, 0x20);
 }
 
@@ -108,7 +108,7 @@ void virtualization_exc_handler(void) {
 	outb(0x20, 0x20);
 }
 
-void security_exc_handler(void) {
-	puts("Security Exception!");
+void security_exc_handler(int error) {
+	printf("Security Exception!: %d\n", error);
 	outb(0x20, 0x20);
 }

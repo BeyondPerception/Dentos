@@ -69,6 +69,7 @@ irq7:
 irq8:
     pushad
     call    doublefault_handler
+    pop     eax
     popad
     iret
 
@@ -77,6 +78,7 @@ irq8:
 irq10:
     pushad
     call    invalidtss_handler
+    pop     eax
     popad
     iret
 
@@ -85,6 +87,7 @@ irq10:
 irq11:
     pushad
     call    seg_notprsnt_handler
+    pop     eax
     popad
     iret
 
@@ -93,6 +96,7 @@ irq11:
 irq12:
     pushad
     call    stack_segfault_handler
+    pop     eax
     popad
     iret
 
@@ -101,6 +105,7 @@ irq12:
 irq13:
     pushad
     call    gpf_handler
+    pop     eax
     popad
     iret
 
@@ -109,6 +114,7 @@ irq13:
 irq14:
     pushad
     call    pagefault_handler
+    pop     eax
     popad
     iret
 
@@ -125,6 +131,7 @@ irq16:
 irq17:
     pushad
     call    align_chk_handler
+    pop     eax
     popad
     iret
 
@@ -157,6 +164,7 @@ irq20:
 irq30:
     pushad
     call    security_exc_handler
+    pop     eax
     popad
     iret
 
