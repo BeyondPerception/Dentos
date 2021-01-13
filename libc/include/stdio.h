@@ -19,7 +19,8 @@ enum OUTSTREAM {
 int printf(const char* __restrict, ...);
 int putchar(int);
 int puts(const char*);
-int fprintf(enum OUTSTREAM, const char* __restrict, va_list);
+int fprintf(enum OUTSTREAM, const char* __restrict, ...);
+int vfprintf(enum OUTSTREAM, const char* __restrict, va_list);
 int fputchar(enum OUTSTREAM, int);
 
 #ifdef __cplusplus

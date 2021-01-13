@@ -7,8 +7,7 @@
 extern "C" {
 #endif
 
-__attribute__((__noreturn__))
-void abort(void);
+__attribute__((__noreturn__)) void abort(void);
 void* malloc(unsigned int);
 void free(unsigned int);
 
