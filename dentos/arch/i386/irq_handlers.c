@@ -78,8 +78,14 @@ void gpf_handler(int error) {
 	outb(0x20, 0x20);
 }
 
-void pagefault_handler(int error) {
-	printf("Page Fault!: %d\n", error);
+void pagefault_handler(unsigned int addr, unsigned int error) {
+	char bitstr[6];
+	bitstr[5] = '\0';
+	for (int i = 4; i >= 0; i--) {
+		bitstr[i] = (error & 1) + '0';
+		error >>= 1;
+	}
+	printf("Page Fault at %p!: %s\n", (void*) addr, bitstr);
 	outb(0x20, 0x20);
 }
 
