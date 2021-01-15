@@ -113,8 +113,10 @@ irq13:
 .global irq14
 irq14:
     pushad
+    mov     eax, cr2
+    push    eax
     call    pagefault_handler
-    pop     eax
+    add     esp, 8
     popad
     iret
 
