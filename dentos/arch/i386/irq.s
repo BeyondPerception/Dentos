@@ -112,12 +112,21 @@ irq13:
 .extern pagefault_handler
 .global irq14
 irq14:
+    push    ebp
+    mov     ebp, esp
     pushad
-    mov     eax, cr2
-    push    eax
+
+    // +4 instead of +8 becuase the error code is pushed after the return addr b/c this is an interrupt handler
+    mov     esi, dword ptr[ebp+4]
+    push    esi # push error code
+    mov     edi, cr2
+    push    edi # push memory address
     call    pagefault_handler
-    add     esp, 8
+    add     esp, 8 # clean up params
+
     popad
+    leave
+    add     esp, 4 # clean up error code
     iret
 
 .extern x87float_exc_handler
