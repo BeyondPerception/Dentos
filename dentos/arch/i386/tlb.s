@@ -6,7 +6,7 @@ invlpg:
     push    ebp
     mov     ebp, esp
 
-    mov     eax, dword ptr[ebp+4]
+    mov     eax, dword ptr[ebp+8]
     invlpg  [eax]
 
     leave
