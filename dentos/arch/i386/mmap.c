@@ -86,13 +86,9 @@ int map_page(void* phys_addr, void* virt_addr, int flags) {
 		pd[pd_index] |= 3;
 	}
 	mapped_pages[pd_index]++;
+	printf("page count: %d\n", mapped_pages[pd_index]);
 	pt[pt_index] = ((unsigned int) phys_addr) | (flags & 0xFFF) | 1;
-	invlpg(phys_addr);
-
-	putsk("Page Directory:");
-	for (int i = 0; i < 1024; i++) {
-		printk("Phys Addr %d: %p\n", i, pd[i] & 0xFFFFF000);
-	}
+	invlpg(virt_addr);
 
 	return 0;
 }
@@ -107,13 +103,13 @@ int unmap_page(void* virt_addr) {
 	int pt_index = ((unsigned int) virt_addr & 0xFF000) / 0x1000;
 
 	unsigned int* pt = pt_base + pd_index * 1024;
-	unsigned int phys_addr = pt[pd_index] & 0xFFFFF000;
 	pt[pt_index] = 0;
 	mapped_pages[pd_index]--;
+	printf("page count: %d\n", mapped_pages[pd_index]);
 	if (mapped_pages[pd_index] == 0) {
 		pd[pd_index] &= ~1;
 	}
-	invlpg((void*) phys_addr);
+	invlpg(virt_addr);
 
 	return 0;
 }
