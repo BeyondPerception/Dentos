@@ -19,7 +19,6 @@ unsigned int* pt_base = (unsigned int*) PT_LOCATION;
 static void* virt2phys(void* virt_addr) {
 	int pd_index = ((unsigned int) virt_addr >> 22);
 	int pt_index = ((unsigned int) virt_addr & 0xFF000) / 0x1000;
-	printf("Calc PD Index: %d\nCalc PT Index: %d\n", pd_index, pt_index);
 	unsigned int* pt = pt_base + pd_index * 1024;
 
 	return (void*) ((pt[pt_index] & 0xFFFFF000) | ((unsigned int) virt_addr & 0xFFF));
@@ -98,7 +97,11 @@ int map_page(void* phys_addr, void* virt_addr, int flags) {
 	return 0;
 }
 
+// A problem with this function is that it just assumes that the physical memory it is mapping is available.
+// This is not necessarily the case, but checking that (from the memory map) is too much work for me.
 static unsigned int fill_pd() {
+	// Find the next page aligned physical address following the kernel.
+	// I could pass the kernel_end parameter here but I already wrote this...
 	unsigned int pd_addr;
 	for (int i = 768; i < 1023; i++) {
 		unsigned int* pt = pt_base + i * 1024;
@@ -111,6 +114,7 @@ static unsigned int fill_pd() {
 		}
 	}
 	found:
+	// propagate the pd with physical addresses so we don't page fault when mapping pages.
 	for (int i = 1; i < 1023; i++) {
 		if (i == 768) {
 			continue;
@@ -119,6 +123,7 @@ static unsigned int fill_pd() {
 		pd_addr += 0x1000;
 	}
 
+	// Return the last used physical address so we know where to avoid when mapping pages
 	return pd_addr;
 }
 
@@ -141,11 +146,6 @@ void mmap_init(multiboot_info_t* multiboot_info, unsigned int kernel_start) {
 	reserved_start = kernel_start;
 	reserved_end = fill_pd();
 	printk("Res End: %p\n", reserved_end);
-
-	map_page((void*) 0x30000000, (void*) 0x30000000, 0b10);
-	int* val = (int*) 0x30000000;
-	*val = 5;
-	printf("Val: %d\n", *val);
 
 	multiboot_memory_map_t* mmap_entry = mb_info->mmap_addr;
 //	while (mmap_entry < mb_info->mmap_addr + mb_info->mmap_length) {
