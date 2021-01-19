@@ -67,46 +67,86 @@ irq7:
 .extern doublefault_handler
 .global irq8
 irq8:
+    push    ebp
+    mov     esp, ebp
     pushad
+
+    // See pagefault_handler
+    mov     esi, dword ptr[ebp+4]
+    push    esi # push error code
     call    doublefault_handler
-    pop     eax
+
     popad
+    leave
+    add     esp, 4
     iret
 
 .extern invalidtss_handler
 .global irq10
 irq10:
+    push    ebp
+    mov     esp, ebp
     pushad
+
+    // See pagefault_handler
+    mov     esi, dword ptr[ebp+4]
+    push    esi # push error code
     call    invalidtss_handler
-    pop     eax
+
     popad
+    leave
+    add     esp, 4
     iret
 
 .extern seg_notprsnt_handler
 .global irq11
 irq11:
+    push    ebp
+    mov     esp, ebp
     pushad
+
+    // See pagefault_handler
+    mov     esi, dword ptr[ebp+4]
+    push    esi # push error code
     call    seg_notprsnt_handler
-    pop     eax
+
     popad
+    leave
+    add     esp, 4
     iret
 
 .extern stack_segfault_handler
 .global irq12
 irq12:
+    push    ebp
+    mov     esp, ebp
     pushad
+
+    // See pagefault_handler
+    mov     esi, dword ptr[ebp+4]
+    push    esi # push error code
     call    stack_segfault_handler
-    pop     eax
+
     popad
+    leave
+    add     esp, 4
     iret
 
 .extern gpf_handler
 .global irq13
 irq13:
+    push    ebp
+    mov     esp, ebp
     pushad
+
+    // See pagefault_handler
+    mov     esi, dword ptr[ebp+4]
+    push    esi # push error code
     call    gpf_handler
-    pop     eax
+
     popad
+    leave
+    add     esp, 4
     iret
 
 .extern pagefault_handler
@@ -142,7 +182,6 @@ irq16:
 irq17:
     pushad
     call    align_chk_handler
-    pop     eax
     popad
     iret
 
@@ -173,10 +212,18 @@ irq20:
 .extern security_exc_handler
 .global irq30
 irq30:
+    push    ebp
+    mov     esp, ebp
     pushad
+
+    // See pagefault_handler
+    mov     esi, dword ptr[ebp+4]
+    push    esi # push error code
     call    security_exc_handler
-    pop     eax
+
     popad
+    leave
+    add     esp, 4
     iret
 
 .extern timer_handler

@@ -94,13 +94,13 @@ void x87float_exc_handler(void) {
 	outb(0x20, 0x20);
 }
 
-void align_chk_handler(int error) {
-	printf("Align Check!: %d\n", error);
+void align_chk_handler() {
+	printf("Align Check Exception!\n");
 	outb(0x20, 0x20);
 }
 
 void machine_chk_handler(void) {
-	puts("Machine Check!");
+	puts("Machine Check Exception!");
 	outb(0x20, 0x20);
 }
 
