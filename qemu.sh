@@ -10,6 +10,14 @@ if [ "$1" = "debug" ]; then
 		-serial stdio \
 		-m size=4096
 	exit
+elif [ "$1" = "host" ]; then
+	echo "Starting QEMU with host passthrough"
+	qemu-system-"$(./scripts/target-triplet-to-arch.sh "$HOST")" \
+		-cpu host \
+		-enable-kvm \
+		-cdrom dentos.iso \
+		-serial stdio \
+		-m size=4096
 else
 	qemu-system-"$(./scripts/target-triplet-to-arch.sh "$HOST")" \
   		-cdrom dentos.iso \
