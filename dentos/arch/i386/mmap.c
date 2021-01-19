@@ -16,14 +16,6 @@ unsigned int* pd = (unsigned int*) PD_LOCATION;
 const unsigned int PT_LOCATION = 0xFFC00000;
 unsigned int* pt_base = (unsigned int*) PT_LOCATION;
 
-static void* virt2phys(void* virt_addr) {
-	int pd_index = ((unsigned int) virt_addr >> 22);
-	int pt_index = ((unsigned int) virt_addr & 0xFF000) / 0x1000;
-	unsigned int* pt = pt_base + pd_index * 1024;
-
-	return (void*) ((pt[pt_index] & 0xFFFFF000) | ((unsigned int) virt_addr & 0xFFF));
-}
-
 __attribute__((unused))
 static void print_page_dir(int pd_index, int pt_index) {
 	unsigned int pde = pd[pd_index];
