@@ -138,7 +138,14 @@ void mmap_init(multiboot_info_t* multiboot_info, unsigned int kernel_start) {
 	mb_start = mb_info;
 	mb_end = mb_info + sizeof(multiboot_memory_map_t);
 
-	map_page((void*) 0x1000, (void*) 0xF012312, 0);
+	reserved_start = kernel_start;
+	reserved_end = fill_pd();
+	printk("Res End: %p\n", reserved_end);
+
+	map_page((void*) 0x30000000, (void*) 0x30000000, 0b10);
+	int* val = (int*) 0x30000000;
+	*val = 5;
+	printf("Val: %d\n", *val);
 
 	multiboot_memory_map_t* mmap_entry = mb_info->mmap_addr;
 //	while (mmap_entry < mb_info->mmap_addr + mb_info->mmap_length) {
