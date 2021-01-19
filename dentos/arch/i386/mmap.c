@@ -66,6 +66,9 @@ static void print_page_dir(int pd_index, int pt_index) {
 // Keeps track of mapped pages. Does not track pages not mapped by these functions (e.g. 0, 768, 1023)
 int mapped_pages[1024];
 
+extern void invlpg(void* phys_addr);
+extern void flushtlb(void);
+
 int map_page(void* phys_addr, void* virt_addr, int flags) {
 	if (((unsigned int) phys_addr & 0xFFFFF000) != (unsigned int) phys_addr ||
 		((unsigned int) virt_addr & 0xFFFFF000) != (unsigned int) virt_addr) {
@@ -84,6 +87,7 @@ int map_page(void* phys_addr, void* virt_addr, int flags) {
 	}
 	mapped_pages[pd_index]++;
 	pt[pt_index] = ((unsigned int) phys_addr) | (flags & 0xFFF) | 1;
+	invlpg(phys_addr);
 
 	putsk("Page Directory:");
 	for (int i = 0; i < 1024; i++) {
@@ -103,11 +107,13 @@ int unmap_page(void* virt_addr) {
 	int pt_index = ((unsigned int) virt_addr & 0xFF000) / 0x1000;
 
 	unsigned int* pt = pt_base + pd_index * 1024;
+	unsigned int phys_addr = pt[pd_index] & 0xFFFFF000;
 	pt[pt_index] = 0;
 	mapped_pages[pd_index]--;
 	if (mapped_pages[pd_index] == 0) {
 		pd[pd_index] &= ~1;
 	}
+	invlpg((void*) phys_addr);
 
 	return 0;
 }
