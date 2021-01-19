@@ -35,6 +35,7 @@ stdio/puts.o \
 stdio/fprintf.o \
 stdio/fputchar.o \
 stdlib/abort.o \
+stdlib/malloc.o \
 string/memcmp.o \
 string/memcpy.o \
 string/memmove.o \
