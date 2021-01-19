@@ -16,6 +16,6 @@ else
   		-serial stdio \
   		-m size=4096
 fi
-if [ "$1" = "clean" ]; then
+#if [ "$1" = "clean" ]; then
   ./scripts/clean.sh
-fi
+#fi
