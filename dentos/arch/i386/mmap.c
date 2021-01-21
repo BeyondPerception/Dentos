@@ -64,7 +64,7 @@ static void print_page_dir(int pd_index, int pt_index) {
 }
 
 // Keeps track of mapped pages. Does not track pages not mapped by these functions (e.g. 0, 768, 1023)
-int mapped_pages[1024];
+short mapped_pages[1024];
 
 extern void invlpg(void* phys_addr);
 extern void flushtlb(void);
@@ -149,10 +149,10 @@ multiboot_info_t* mb_info;
 unsigned int mb_start;
 unsigned int mb_end;
 
-unsigned int reserved_start;
-unsigned int reserved_end;
+unsigned int reserved_phys_start;
+unsigned int reserved_phys_end;
 
-void mmap_init(multiboot_info_t* multiboot_info, unsigned int kernel_start) {
+void mmap_init(multiboot_info_t* multiboot_info) {
 	if ((multiboot_info->flags & 1 << 6) == 0) {
 		puts("Error: no multiboot memory map provided!");
 		panic();
@@ -161,11 +161,6 @@ void mmap_init(multiboot_info_t* multiboot_info, unsigned int kernel_start) {
 	mb_start = mb_info;
 	mb_end = mb_info + sizeof(multiboot_memory_map_t);
 
-	reserved_start = kernel_start;
-	reserved_end = fill_pd();
-	printk("Res End: %p\n", reserved_end);
-
-	multiboot_memory_map_t* mmap_entry = mb_info->mmap_addr;
-//	while (mmap_entry < mb_info->mmap_addr + mb_info->mmap_length) {
-//	}
+	reserved_phys_start = 0;
+	unsigned int page_tables_end = fill_pd();
 }
