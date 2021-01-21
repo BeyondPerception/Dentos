@@ -1,6 +1,5 @@
 #include <kernel/multiboot.h>
 #include <stdio.h>
-#include <kernel/kernel.h>
 #include <kernel/serial.h>
 
 // Constant address because we put the address of the page directory into the last entry.
@@ -152,15 +151,11 @@ unsigned int mb_end;
 unsigned int reserved_phys_start;
 unsigned int reserved_phys_end;
 
-void mmap_init(multiboot_info_t* multiboot_info) {
-	if ((multiboot_info->flags & 1 << 6) == 0) {
-		puts("Error: no multiboot memory map provided!");
-		panic();
-	}
-	mb_info = multiboot_info;
-	mb_start = mb_info;
-	mb_end = mb_info + sizeof(multiboot_memory_map_t);
-
-	reserved_phys_start = 0;
-	unsigned int page_tables_end = fill_pd();
+/**
+ * Sets up the page tables. Initializes the page tables in physical memory directly after the kernel
+ *
+ * @return The first free page-aligned address following the page tables.
+ */
+unsigned int ptables_init() {
+	return fill_pd();
 }
