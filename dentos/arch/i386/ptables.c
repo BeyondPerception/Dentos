@@ -1,5 +1,3 @@
-#include <kernel/multiboot.h>
-#include <stdio.h>
 #include <kernel/serial.h>
 
 // Constant address because we put the address of the page directory into the last entry.
@@ -16,8 +14,7 @@ const unsigned int PT_LOCATION = 0xFFC00000;
 unsigned int* pt_base = (unsigned int*) PT_LOCATION;
 
 __attribute__((unused))
-static void print_page_dir(int pd_index, int pt_index) {
-	unsigned int pde = pd[pd_index];
+static void print_page_dir(int pd_index) {
 	unsigned int* pt = pt_base + pd_index * 1024;
 
 	putsk("Page Directory:");
@@ -25,7 +22,7 @@ static void print_page_dir(int pd_index, int pt_index) {
 		char str[34];
 		str[33] = '\0';
 
-		pde = pd[i];
+		unsigned int pde = pd[i];
 
 		for (int j = 32; j >= 0; j--) {
 			if (j == 20) {
@@ -38,7 +35,7 @@ static void print_page_dir(int pd_index, int pt_index) {
 
 		printk("%04d-%p: %s\n", i, &pd[i], str);
 	}
-	if (pt_index == -1) {
+	if (pd_index == -1) {
 		return;
 	}
 	putsk("---------------------------------------");
@@ -85,7 +82,6 @@ int map_page(void* phys_addr, void* virt_addr, int flags) {
 		pd[pd_index] |= 3;
 	}
 	mapped_pages[pd_index]++;
-	printf("page count: %d\n", mapped_pages[pd_index]);
 	pt[pt_index] = ((unsigned int) phys_addr) | (flags & 0xFFF) | 1;
 	invlpg(virt_addr);
 
@@ -104,7 +100,6 @@ int unmap_page(void* virt_addr) {
 	unsigned int* pt = pt_base + pd_index * 1024;
 	pt[pt_index] = 0;
 	mapped_pages[pd_index]--;
-	printf("page count: %d\n", mapped_pages[pd_index]);
 	if (mapped_pages[pd_index] == 0) {
 		pd[pd_index] &= ~1;
 	}
@@ -143,13 +138,6 @@ static unsigned int fill_pd() {
 	// Return the last used physical address so we know where to avoid when mapping pages
 	return pd_addr;
 }
-
-multiboot_info_t* mb_info;
-unsigned int mb_start;
-unsigned int mb_end;
-
-unsigned int reserved_phys_start;
-unsigned int reserved_phys_end;
 
 /**
  * Sets up the page tables. Initializes the page tables in physical memory directly after the kernel
