@@ -86,8 +86,6 @@ extern void irq33(void);
 void idt_init(void) {
 	PIC_remap(0x20, 0x28);
 
-	printk("IDT Location: %p\n", idt);
-
 	// 0x8 is the kernel code segment. Each gdt entry is 8 bytes long, and the kernel code segment is the second one.
 	add_irq(0, (unsigned long) irq0, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
 	add_irq(1, (unsigned long) irq1, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
@@ -109,7 +107,6 @@ void idt_init(void) {
 	add_irq(19, (unsigned long) irq19, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
 	add_irq(20, (unsigned long) irq20, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
 	add_irq(30, (unsigned long) irq30, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
-
 
 	add_irq(32, (unsigned long) irq32, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
 	add_irq(33, (unsigned long) irq33, 0x8, 0b1000 << 4 | INTERRUPT_GATE);
