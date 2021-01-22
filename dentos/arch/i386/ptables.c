@@ -14,7 +14,7 @@ const unsigned int PT_LOCATION = 0xFFC00000;
 unsigned int* pt_base = (unsigned int*) PT_LOCATION;
 
 __attribute__((unused))
-static void print_page_dir(int pd_index) {
+void print_page_dir(int pd_index) {
 	unsigned int* pt = pt_base + pd_index * 1024;
 
 	putsk("Page Directory:");
@@ -73,7 +73,7 @@ int map_page(void* phys_addr, void* virt_addr, int flags) {
 	}
 
 	int pd_index = ((unsigned int) virt_addr >> 22);
-	int pt_index = ((unsigned int) virt_addr & 0xFF000) / 0x1000;
+	int pt_index = ((unsigned int) virt_addr >> 12) & 0x3FF;
 
 	unsigned int pde = pd[pd_index];
 	unsigned int* pt = pt_base + pd_index * 1024;
@@ -141,6 +141,7 @@ static unsigned int fill_pd() {
 
 /**
  * Sets up the page tables. Initializes the page tables in physical memory directly after the kernel
+ * This file is also the only one aware that page table 1, 768, and 1023 are reserved pages already mapped
  *
  * @return The first free page-aligned address following the page tables.
  */
