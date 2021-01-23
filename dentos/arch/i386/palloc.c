@@ -1,31 +1,25 @@
 #include <stdio.h>
+#include <stddef.h>
 
 #include <kernel/multiboot.h>
 #include <kernel/ptables.h>
 #include <kernel/kernel.h>
 #include <kernel/serial.h>
 
+unsigned int* stack_top = (unsigned int*) 0xFF800000;
+unsigned int* const stack_bottom = (unsigned int*) 0xFF800000;
+
 void* next_page() {
-
-}
-
-void* fetch_pages(unsigned int n) {
-
+	if (stack_top < stack_bottom) {
+		// OUT OF MEMORY!!!
+		return NULL;
+	}
+	return (void*) *stack_top--;
 }
 
 void free_page(void* addr) {
-
+	*(++stack_top) = (unsigned int) addr;
 }
-
-void free_pages(void* addr) {
-
-}
-
-multiboot_info_t* mb_info;
-unsigned int mb_start;
-unsigned int mb_end;
-
-unsigned int* stack_top = (unsigned int*) 0xFF800000;
 
 static void map_stack(unsigned int phys_addr) {
 	// Reserve the 1022nd page table for the page stack. Stick it in physical memory right after the page tables.
@@ -36,6 +30,10 @@ static void map_stack(unsigned int phys_addr) {
 		virt_addr += 4096;
 	}
 }
+
+multiboot_info_t* mb_info;
+unsigned int mb_start;
+unsigned int mb_end;
 
 static void setup_stack(unsigned int map_addr) {
 	map_stack(map_addr);
