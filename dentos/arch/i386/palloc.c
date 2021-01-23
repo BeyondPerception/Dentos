@@ -9,6 +9,9 @@
 unsigned int* stack_top = (unsigned int*) 0xFF800000;
 unsigned int* const stack_bottom = (unsigned int*) 0xFF800000;
 
+/**
+ * @return The physical address of the next available page on the stack.
+ */
 void* next_page() {
 	if (stack_top < stack_bottom) {
 		// OUT OF MEMORY!!!
@@ -17,6 +20,9 @@ void* next_page() {
 	return (void*) *stack_top--;
 }
 
+/**
+ * @param addr The physical address of a page to be put back into the page stack. This address MUST have come from next_page.
+ */
 void free_page(void* addr) {
 	*(++stack_top) = (unsigned int) addr;
 }
