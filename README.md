@@ -9,5 +9,3 @@ Build and run with:
 ```
 
 All scripts assume you are calling them from the project root directory
-
-test
